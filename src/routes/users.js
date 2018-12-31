@@ -16,12 +16,12 @@ const checkJwt = jwt({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: `https://${process.env.REACT_APP_AUTH_DOMAIN}/.well-known/jwks.json`
+        jwksUri: `https://${process.env.AUTH_DOMAIN}/.well-known/jwks.json`
     }),
 
     // Validate the audience and the issuer.
-    audience: process.env.REACT_APP_AUTH_AUDIENCE,
-    issuer: `https://${process.env.REACT_APP_AUTH_DOMAIN}/`,
+    audience: process.env.AUTH_AUDIENCE,
+    issuer: `https://${process.env.AUTH_DOMAIN}/`,
     algorithms: ['RS256']
 });
 

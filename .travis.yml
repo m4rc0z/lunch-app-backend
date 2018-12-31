@@ -1,0 +1,12 @@
+language: node_js
+node_js: node
+cache:
+  directories:
+  - node_modules
+deploy:
+  provider: heroku
+  api_key:
+    secure: YX0V4nGHhXTmU2P8b7rF1dIc6/cIgRHaTrtShl9Et+yILJWym8f4yu+T7BzCoOEMsGC6O8/NUPl3tsTPdEXdpr4sRBZUdT0TDKtnPENY787NSewDEWmRFLJqjy+RSzsYKUZsvoyqqRIHznBF6x5ni00dO3iWH18gCL61ZLM680rJyj3ngyk+R3vM6hQSioziZa+BmjSI2D2u2vVB3oWZRYNsM3D58xujEXWKGhjA//fitehFp/uQJ1V6TH/OgEM05yLIjomY8rJR7oXXnAtp7/1uShcy2Nb10U/Ajwx70Xfxm4cFxhvLN1ghGdjWZi1/smlN5dT/u/fpn2QA3CmAJX0Xmd89KFRoXb+jUWt8x6BQSfop46y4GcFrtefbaJMa0cOE4DBid9F6cN0Nz4V+GT10Ffv+A2FaGZU7tq6A0Fx7Aqx6RA4CHOmwbOW95HtgvKQgxz79AEgNyYT27CF7nO7ee/GsfEguTk2Rn2emuPZT/ZTblY2nDWWQ2ecMv9OLeLknJg6yclsFpELK5/zPLXRoFcgEkIZlOkN6H9q3G9IKcxNOfvLxvDuh6GKRlBTtPJ2pkCOMv0uRwCTEqqV8Nb4f9bd6F76rHJbE2znvQPbulh1G0ri7z12GEkE3qsFlENrg434ybL6SenftIsJ5xgiODea2z+zZKRqAl5Ap2Mc=
+  app: lunch-app-backend
+  on:
+    repo: m4rc0z/lunch-app-backend
