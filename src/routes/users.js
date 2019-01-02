@@ -72,9 +72,14 @@ router.get('/public', function (req, res) {
 
 // This route need authentication
 router.get('/private', checkJwt, function (req, res) {
-    res.send({
-        message: 'Hello from a private endpoint! You need to be authenticated to see this.'
-    });
+    MessageModel.findOne().where('type').equals('private')
+        .exec(function (err, message) {
+            if (err) return handleError(err);
+            console.log('Found Private Message %s', message.message);
+            res.send({
+                message: message.message
+            });
+        });
 });
 
 const checkScopes = jwtAuthz(['read:messages']);
