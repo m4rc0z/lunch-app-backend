@@ -25,9 +25,11 @@ const checkJwt = jwt({
     issuer: `https://${process.env.AUTH_DOMAIN}/`,
     algorithms: ['RS256']
 });
+
 function handleError(error) {
     console.error(error);
 }
+
 const mongoDB = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
 console.log(mongoDB);
 mongoose.connect(mongoDB);
@@ -42,7 +44,20 @@ const messageSchema = new Schema({
     type: String,
 });
 
+const menuSchema = new Schema({
+    RID: String,
+    menus: [{
+        price: Number,
+        date: Date,
+        courses: [{
+            course: Number,
+            description: String
+        }]
+    }]
+});
+
 const MessageModel = mongoose.model('MessageModel', messageSchema);
+const MenuModel = mongoose.model('MenuModel', menuSchema);
 
 const publicInstance = new MessageModel({message: 'awesome public', type: 'public'});
 
@@ -79,6 +94,16 @@ router.get('/private', checkJwt, function (req, res) {
             res.send({
                 message: message.message
             });
+        });
+});
+
+router.get('/menus/', checkJwt, function (req, res) {
+    MenuModel.remove();
+    MenuModel.find()
+        .exec(function (err, menus) {
+            if (err) return handleError(err);
+            console.log('Found Menus %s', menus);
+            res.send(menus);
         });
 });
 
