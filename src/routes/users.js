@@ -57,7 +57,7 @@ const menuSchema = new Schema({
 });
 
 const MessageModel = mongoose.model('MessageModel', messageSchema);
-const MenuModel = mongoose.model('MenuModel', menuSchema);
+const MenuModel = mongoose.model('MenuModel', menuSchema, 'menus');
 
 const publicInstance = new MessageModel({message: 'awesome public', type: 'public'});
 
@@ -103,7 +103,8 @@ router.get('/menus/', checkJwt, function (req, res) {
         .exec(function (err, menus) {
             if (err) return handleError(err);
             console.log('Found Menus %s', menus);
-            res.send(menus);
+            // TODO: fix this ugly code
+            res.send(menus[0]);
         });
 });
 
