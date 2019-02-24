@@ -20,8 +20,9 @@
     "pug": "2.0.0-beta11"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "chai": "4.2.0",
     "mocha": "^5.2.0",
+    "mongodb-memory-server": "3.1.1",
     "supertest": "^3.3.0"
   }
 }
