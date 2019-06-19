@@ -18,10 +18,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const mongoDB = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
+// const mongoDB = `mongodb://${process.env.DB_HOST}/${process.env.DB_NAME}`;
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+db.createCollection('menus');
+// db.collections['menus'].deleteMany(); // TODO: remove this
 
 app.use('/', indexRouter);
 app.use('/api', menuRouter);

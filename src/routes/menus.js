@@ -30,4 +30,6 @@ router.get('/menus/', checkJwt, Controller.get);
 
 router.put('/menus/', checkJwt, Controller.update);
 
+router.delete('/menus/', checkJwt, Controller.delete);
+
 module.exports = router;
