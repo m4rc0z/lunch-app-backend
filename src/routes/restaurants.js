@@ -26,7 +26,8 @@ const checkJwt = jwt({
     algorithms: ['RS256']
 });
 
-const adminCheck = (req, res, next) => {
+// TODO: add unit test for this
+const onlyForAdmin = (req, res, next) => {
     const roles = req.user['lunchmenuapp.eu.auth0.com/roles'] || [];
     if (roles.indexOf('admin') > -1) {
         next();
@@ -35,22 +36,26 @@ const adminCheck = (req, res, next) => {
     }
 };
 
-const enhanceWithAdmin = (req, res, next) => {
+// TODO: add unit test for this
+const adminCheck = (req, res, next) => {
+    console.log('test');
     const roles = req.user['lunchmenuapp.eu.auth0.com/roles'] || [];
     if (roles.indexOf('admin') > -1) {
-        req.isAdmin = true;
+        next();
     } else {
-        req.isAdmin = false;
+        if (req.user.sub !== req.params.id) {
+            res.status(401).send({message: 'not authorized for admin access'})
+        } else {
+            next();
+        }
     }
-    next();
 };
 
-// router.get('/', checkJwt, adminCheck, Controller.getAll);
-router.get('', Controller.getAll);
-router.get('/:id', Controller.get);
-router.get('/:id/menus', Controller.getMenus);
-router.put('/:id/menus', Controller.updateMenus);
-router.delete('/:id/menus', Controller.deleteMenus);
-router.put('/:id', Controller.update);
+router.get('/', checkJwt, onlyForAdmin, Controller.getAll);
+router.get('/:id', checkJwt, adminCheck, Controller.get);
+router.get('/:id/menus', checkJwt, adminCheck, Controller.getMenus);
+router.put('/:id/menus', checkJwt, adminCheck, Controller.updateMenus);
+router.delete('/:id/menus', checkJwt, adminCheck, Controller.deleteMenus);
+router.put('/:id', checkJwt, adminCheck, Controller.update);
 
 module.exports = router;

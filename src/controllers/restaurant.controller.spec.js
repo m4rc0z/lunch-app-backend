@@ -5,7 +5,7 @@ const Controller = require('./restaurant.controller');
 const Menu = require('../models/menu.model');
 const Restaurant = require('../models/restaurant.model');
 
-describe.only('Restaurant Controller', function () {
+describe('Restaurant Controller', function () {
     let req = {
             body: {
                 menus: undefined,

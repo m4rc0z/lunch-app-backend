@@ -99,7 +99,7 @@ Controller.updateMenus = function (req, res) {
                 menus.map(m => restaurant.menus.push(m._id));
                 restaurant.save((err, restaurant) => {
                     if (err) {
-                        return res.send(500, err).end();// TODO: this is not pssible when error already happened at line 96
+                        return res.send(500, err).end();
                     }
 
                     restaurant.populate('menus').populate((err, populatedRestaurant) => {
