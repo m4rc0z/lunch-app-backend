@@ -1,13 +1,9 @@
-require('../models/restaurant.model');
-const mongoose = require("mongoose");
-const Restaurant = mongoose.model('Restaurant');
-const Menu = mongoose.model('Menu');
+const Menu = require('../models/menu.model');
+const Restaurant = require('../models/restaurant.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const Controller = {};
 
-// TODO: check how to verify if admin -> when admin then its possible to request all restaurants
-// TODO: user specific route with id for specific restaurants
 Controller.getAll = function (req, res) {
     return Restaurant.find({})
         .exec(function (err, restaurants) {
@@ -22,11 +18,6 @@ Controller.getAll = function (req, res) {
 };
 
 Controller.get = function (req, res) {
-    // if (!req.isAdmin && req.user.sub !== req.params.id) {
-    //      return res.send(401, 'not allowed to request data');
-    // }
-    // RID = auth0 id = id of url
-    // objectid is private -> TODO: check if this id needs to be transfered to the frontend or if its only in the backend available
     return Restaurant
         .findOneAndUpdate({RID: req.params.id}, {}, {
             upsert: true,
@@ -45,7 +36,6 @@ Controller.get = function (req, res) {
 };
 
 Controller.getMenus = function (req, res) {
-    // TODO: add check if own menus are requested or if admin
     return Restaurant
         .findOneAndUpdate({RID: req.params.id}, {}, {
             upsert: true,
@@ -65,7 +55,6 @@ Controller.getMenus = function (req, res) {
 
 // This is to update restaurant data
 Controller.update = function (req, res) {
-    // TODO(2): check how to update restaurant data
     return Restaurant
         .findOneAndUpdate(
             {RID: req.params.id},
