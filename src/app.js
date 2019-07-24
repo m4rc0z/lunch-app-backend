@@ -6,7 +6,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const indexRouter = require('./routes');
-const menuRouter = require('./routes/menus');
+const restaurantRouter = require('./routes/restaurants');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -17,14 +17,19 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const mongoDB = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
+// const mongoDB = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
+const mongoDB = `mongodb://${process.env.DB_HOST}/${process.env.DB_NAME}`;
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+db.createCollection('restaurants');
+db.createCollection('menus');
+// db.collections['menus'].deleteMany(); // TODO: remove this
+
 app.use('/', indexRouter);
-app.use('/api', menuRouter);
+app.use('/api/restaurants', restaurantRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

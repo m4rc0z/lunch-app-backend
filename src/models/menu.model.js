@@ -1,15 +1,14 @@
 const mongoose = require("mongoose");
 const Schema = require("mongoose").Schema;
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const menuSchema = new Schema({
-    RID: String,
-    menus: [{
-        price: Number,
-        date: Date,
-        courses: [{
-            course: Number,
-            description: String
-        }]
+    _id: ObjectId,
+    price: Number,
+    date: Date,
+    courses: [{
+        course: Number,
+        description: String
     }]
 });
 
