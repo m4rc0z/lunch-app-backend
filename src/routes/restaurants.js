@@ -9,7 +9,7 @@ const Controller = require('../controllers/restaurant.controller');
 // Authentication middleware. When used, the
 // Access Token must exist and be verified against
 // TODO: add unit test for this
-const roles = 'https://lunchmenuapp/roles';
+const rolesAuth0 = 'https://lunchmenuapp/roles';
 
 // the Auth0 JSON Web Key Set
 const checkJwt = jwt({
@@ -30,7 +30,7 @@ const checkJwt = jwt({
 });
 
 const onlyForAdmin = (req, res, next) => {
-    const roles = req.user[roles] || [];
+    const roles = req.user[rolesAuth0] || [];
     if (roles.indexOf('admin') > -1) {
         next();
     } else {
