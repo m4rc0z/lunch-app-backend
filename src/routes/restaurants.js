@@ -8,6 +8,9 @@ const Controller = require('../controllers/restaurant.controller');
 
 // Authentication middleware. When used, the
 // Access Token must exist and be verified against
+// TODO: add unit test for this
+const roles = `https://${process.env.AUTH_DOMAIN}/roles`;
+
 // the Auth0 JSON Web Key Set
 const checkJwt = jwt({
     // Dynamically provide a signing key
@@ -26,9 +29,8 @@ const checkJwt = jwt({
     algorithms: ['RS256']
 });
 
-// TODO: add unit test for this
 const onlyForAdmin = (req, res, next) => {
-    const roles = req.user['lunchmenuapp.eu.auth0.com/roles'] || [];
+    req.user[roles] || [];
     if (roles.indexOf('admin') > -1) {
         next();
     } else {
@@ -38,8 +40,7 @@ const onlyForAdmin = (req, res, next) => {
 
 // TODO: add unit test for this
 const adminCheck = (req, res, next) => {
-    console.log('test');
-    const roles = req.user['lunchmenuapp.eu.auth0.com/roles'] || [];
+    const roles = req.user[roles] || [];
     if (roles.indexOf('admin') > -1) {
         next();
     } else {
