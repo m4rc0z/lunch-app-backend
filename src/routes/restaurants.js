@@ -30,7 +30,7 @@ const checkJwt = jwt({
 });
 
 const onlyForAdmin = (req, res, next) => {
-    req.user[roles] || [];
+    const roles = req.user[roles] || [];
     if (roles.indexOf('admin') > -1) {
         next();
     } else {
