@@ -40,7 +40,7 @@ const onlyForAdmin = (req, res, next) => {
 
 // TODO: add unit test for this
 const adminCheck = (req, res, next) => {
-    const roles = req.user[roles] || [];
+    const roles = req.user[rolesAuth0] || [];
     if (roles.indexOf('admin') > -1) {
         next();
     } else {
