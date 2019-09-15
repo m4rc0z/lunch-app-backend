@@ -54,9 +54,9 @@ const adminCheck = (req, res, next) => {
 
 router.get('/', checkJwt, onlyForAdmin, Controller.getAll);
 router.get('/:id', checkJwt, adminCheck, Controller.get);
-router.get('/:id/menus', checkJwt, adminCheck, Controller.getMenus);
-router.put('/:id/menus', checkJwt, adminCheck, Controller.updateMenus);
-router.delete('/:id/menus', checkJwt, adminCheck, Controller.deleteMenus);
+router.get('/:id/menus', Controller.getMenus);
+router.put('/:id/menus', Controller.updateMenus);
+router.delete('/:id/menus', Controller.deleteMenus);
 router.put('/:id', checkJwt, adminCheck, Controller.update);
 
 module.exports = router;
