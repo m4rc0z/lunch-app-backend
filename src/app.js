@@ -7,6 +7,8 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const indexRouter = require('./routes');
 const restaurantRouter = require('./routes/restaurants');
+const newRestaurantRouter = require('./routes/newRestaurants');
+const categoryRouter = require('./routes/categories');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -26,10 +28,13 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 db.createCollection('restaurants');
 db.createCollection('menus');
+db.createCollection('category');
 // db.collections['menus'].deleteMany(); // TODO(before-release): remove this
 
 app.use('/', indexRouter);
 app.use('/api/restaurants', restaurantRouter);
+app.use('/api2/restaurants', newRestaurantRouter);
+app.use('/api2/categories', categoryRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
