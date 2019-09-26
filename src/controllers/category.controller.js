@@ -15,13 +15,11 @@ Controller.getCategories = function (req, res) {
     return Category
         .find({})
         .exec(function (err, categories) {
-            // TODO: add this handling to specific function which is unit tested separately
             if (err) {
                 return res.send(500, err);
             } else if (!categories) {
                 return res.status(404).end();
             } else {
-                // TODO: check if categories are included inside date range
                 async.filter(
                     categories,
                     (c, callback) => {
@@ -32,12 +30,14 @@ Controller.getCategories = function (req, res) {
                             },
                             categories: {$in: c._id}
                         }).count().exec((err, count) => {
-                            console.log(count > 0);
                             callback(err, count > 0);
                         });
                     },
                     (err, filteredCategories) => {
-                        console.log('fc', filteredCategories);
+                        if (err) {
+                            return res.send(500, err);
+                        }
+
                         return res.send(filteredCategories || []);
                     }
                 );

@@ -6,6 +6,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 const Controller = {};
 
+// TODO: check if this function is needed
 Controller.getAll = function (req, res) {
     return Restaurant.find({})
         .populate({
@@ -26,17 +27,7 @@ Controller.getAll = function (req, res) {
         });
 };
 
-dateTimeReviver = function (key, value) {
-    var a;
-    if (typeof value === 'string') {
-        a = /\/Date\((\d*)\)\//.exec(value);
-        if (a) {
-            return new Date(+a[1]);
-        }
-    }
-    return value;
-};
-
+// TODO: make this null save and error prove
 Controller.getByDate = function (req, res) {
     if (!req.query.fromDate || !req.query.toDate) {
         return res.status(404).end();
@@ -45,8 +36,6 @@ Controller.getByDate = function (req, res) {
     const start = new Date(req.query.fromDate.substr(0, 10));
     const end = new Date(req.query.toDate.substr(0, 10));
     // TODO: test if this is correct like that -> filtered correctly (check that time does get ignored)
-    // TODO: do not populate data for restaurants endpoint, instead populate at menus endpoint
-    // TODO: check how to unpopulate again
     return Restaurant.find({})
         .populate('menus', null, {
                 date: {
@@ -67,6 +56,7 @@ Controller.getByDate = function (req, res) {
         });
 };
 
+// TODO: make this null save and error prove
 Controller.getRestaurantMenusByDate = function (req, res) {
     if (!req.query.fromDate || !req.query.toDate) {
         return res.status(404).end();
@@ -92,7 +82,6 @@ Controller.getRestaurantMenusByDate = function (req, res) {
             }, // 1st level subdoc (get comments)
         )
         .exec(function (err, restaurant) {
-            // TODO: add this handling to specific function which is unit tested separately
             if (err) {
                 return res.send(500, err);
             } else if (!restaurant) {

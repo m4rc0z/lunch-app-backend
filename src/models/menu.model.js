@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = require("mongoose").Schema;
-const Category = require('../models/category.model');
 const ObjectId = require('mongoose').Types.ObjectId;
-const async = require('async');
+const menuUtil = require("../menu.util");
 
 const menuSchema = new Schema({
     _id: ObjectId,
@@ -15,29 +14,9 @@ const menuSchema = new Schema({
     categories: [{type: Schema.Types.ObjectId, ref: 'Category'}]
 });
 
-menuSchema.post('remove', removeLinkedCategoriesWhenUnused);
+menuSchema.post('remove', menu => menuUtil.removeLinkedCategoriesWhenUnused(menu, mongoose.model('Menu', menuSchema, 'menus')));
 
 const model = mongoose.model('Menu', menuSchema, 'menus');
 
-function removeLinkedCategoriesWhenUnused(doc) {
-    async.each(doc.categories, (c, callback) => {
-            model.find({categories: { $in: [c] }}).count().exec((err, count) => {
-                if (count === 0) {
-                    Category.remove({_id: c}).exec((err, _) => {
-                        callback(err || undefined);
-                    })
-                } else {
-                    callback();
-                }
-            })
-        },
-        (err) => {
-            if (err) {
-                // TODO: handle error
-                console.log(err)
-            }
-        }
-    );
-}
 
 module.exports = model;
