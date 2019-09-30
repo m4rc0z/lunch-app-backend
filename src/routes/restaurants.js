@@ -2,13 +2,32 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
+
+const multer = require("multer");
+const cloudinary = require("cloudinary");
+
+const cloudinaryStorage = require("multer-storage-cloudinary");
+
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET
+});
+const storage = cloudinaryStorage({
+    cloudinary: cloudinary,
+    folder: "demo",
+    allowedFormats: ["jpg", "png"],
+    transformation: [{ width: 500, height: 500, crop: "limit" }]
+});
+
+const parser = multer({ storage: storage });
+
 require('dotenv').load();
 
 const Controller = require('../controllers/restaurant.controller');
 
 // Authentication middleware. When used, the
 // Access Token must exist and be verified against
-// TODO: add unit test for this
 const rolesAuth0 = 'https://lunchmenuapp/roles';
 
 // the Auth0 JSON Web Key Set
@@ -53,10 +72,11 @@ const adminCheck = (req, res, next) => {
 };
 
 router.get('/', checkJwt, onlyForAdmin, Controller.getAll);
-router.get('/:id', checkJwt, adminCheck, Controller.get);
+router.get('/:id', checkJwt, adminCheck, Controller.getOne);
 router.get('/:id/menus', checkJwt, adminCheck, Controller.getMenus);
 router.put('/:id/menus', checkJwt, adminCheck, Controller.updateMenus);
 router.delete('/:id/menus', checkJwt, adminCheck, Controller.deleteMenus);
+router.post('/:id/image', checkJwt, adminCheck, parser.single("image"), Controller.updateImage);
 router.put('/:id', checkJwt, adminCheck, Controller.update);
 
 module.exports = router;

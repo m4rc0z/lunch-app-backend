@@ -4,6 +4,11 @@ const Schema = require("mongoose").Schema;
 const restaurantSchema = new Schema({
     _id: Schema.Types.ObjectId,
     RID: String,
+    name: String,
+    address: String,
+    postalCode: String,
+    city: String,
+    imageUrl: String,
     menus: [{ type: Schema.Types.ObjectId, ref: 'Menu'}]
 });
 

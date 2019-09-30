@@ -2,8 +2,8 @@ const sinon = require('sinon');
 const sinonTest = require('sinon-test');
 const test = sinonTest(sinon);
 const Controller = require('./restaurant.controller');
-const Menu = require('../models/menu.model');
 const Restaurant = require('../models/restaurant.model');
+const restaurantUtil = require("../restaurant.util");
 
 describe('Restaurant Controller', function () {
     let req = {
@@ -19,6 +19,15 @@ describe('Restaurant Controller', function () {
         },
         res = {}, expectedResult;
 
+    let sandbox;
+    beforeEach(function () {
+        sandbox = sinon.createSandbox();
+    });
+
+    afterEach(function () {
+        sandbox.restore();
+    });
+
     describe('getAll', function () {
         beforeEach(function () {
             res = {
@@ -28,45 +37,47 @@ describe('Restaurant Controller', function () {
             expectedResult = req.body
         });
 
-        it('should return expected restaurants', test(function () {
-            const mongoResponse = ['test', 'test2'];
-            this.stub(Restaurant, 'find').returns({
-                exec: exec => exec(undefined, mongoResponse)
-            });
+        const addSpyAndAssert = (error, response) => {
+            const populate = {
+                populate: sinon.stub().callsFake(() => ({exec: exec => exec(error, response)})),
+            };
+            Restaurant.find = sinon.stub().callsFake(() => populate);
+
             Controller.getAll(req, res);
+
             sinon.assert.calledWith(
                 Restaurant.find,
-                {}
+                {},
             );
+
+            sinon.assert.calledWith(
+                populate.populate,
+                {
+                    path: 'menus',
+                    populate: { // 2nd level subdoc (get users in comments)
+                        path: 'categories',
+                    }
+                });
+        };
+
+        it('should return expected restaurants', test(function () {
+            const mongoResponse = ['test', 'test2'];
+            addSpyAndAssert(undefined, mongoResponse);
             sinon.assert.calledWith(res.send, mongoResponse);
         }));
 
         it('should return 500 when restaurants error', test(function () {
-            this.stub(Restaurant, 'find').returns({
-                exec: exec => exec('error', undefined)
-            });
-            Controller.getAll(req, res);
-            sinon.assert.calledWith(
-                Restaurant.find,
-                {}
-            );
+            addSpyAndAssert('error', undefined);
             sinon.assert.calledWith(res.send, 500, 'error');
         }));
 
         it('should return 404 when restaurants undefined', test(function () {
-            this.stub(Restaurant, 'find').returns({
-                exec: exec => exec(undefined, undefined)
-            });
-            Controller.getAll(req, res);
-            sinon.assert.calledWith(
-                Restaurant.find,
-                {}
-            );
-            sinon.assert.calledWith(res.status, 404);
+            addSpyAndAssert(undefined, undefined);
+            sinon.assert.calledWith(res.send, 404);
         }));
     });
 
-    describe('get', function () {
+    describe('getOne', function () {
         beforeEach(function () {
             res = {
                 send: sinon.spy(),
@@ -75,50 +86,48 @@ describe('Restaurant Controller', function () {
             expectedResult = req.body
         });
 
-        it('should return expected restaurants', test(function () {
-            const mongoResponse = ['test', 'test2'];
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                populate: () => ({
-                    exec: exec => exec(undefined, mongoResponse)
-                })
-            });
-            Controller.get(req, res);
+        const addSpyAndAssert = (error, response) => {
+            const populate = {
+                populate: sinon.stub().callsFake(() => {
+                    return {populate: populate2}
+                }),
+            };
+            const populate2 = sinon.stub().callsFake(() => ({exec: exec => exec(error, response)}));
+            Restaurant.findOneAndUpdate = sinon.stub().callsFake(() => populate);
+
+            Controller.getOne(req, res);
+
             sinon.assert.calledWith(
                 Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {},
-                {upsert: true, new: true}
+                {RID: req.params.id}, {}, {
+                    upsert: true,
+                    new: true
+                },
             );
+
+            sinon.assert.calledWith(
+                populate.populate,
+                'menus'
+            );
+            sinon.assert.calledWith(
+                populate2,
+                'categories'
+            );
+        };
+        it('should return expected restaurants', test(function () {
+            const mongoResponse = ['test', 'test2'];
+            addSpyAndAssert(undefined, mongoResponse);
             sinon.assert.calledWith(res.send, mongoResponse);
         }));
 
         it('should return 500 when restaurants error', test(function () {
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                populate: () => ({
-                    exec: exec => exec('error', undefined)
-                })
-            });
-            Controller.get(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {},
-                {upsert: true, new: true}
-            );
+            addSpyAndAssert('error', undefined);
             sinon.assert.calledWith(res.send, 500, 'error');
         }));
 
         it('should return 404 when restaurants undefined', test(function () {
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                populate: () => ({
-                    exec: exec => exec(undefined, undefined)
-                })
-            });
-            Controller.get(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {},
-                {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.status, 404);
+            addSpyAndAssert(undefined, undefined);
+            sinon.assert.calledWith(res.send, 404);
         }));
     });
 
@@ -131,50 +140,49 @@ describe('Restaurant Controller', function () {
             expectedResult = req.body
         });
 
-        it('should return expected menus', test(function () {
-            const mongoResponse = {testrestaurant: 'test'};
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                populate: () => ({
-                    exec: exec => exec(undefined, mongoResponse)
-                })
-            });
+        const addSpyAndAssert = (error, response) => {
+            const populate = {
+                populate: sinon.stub().callsFake(() => {
+                    return {exec: exec => exec(error, response)}
+                }),
+            };
+            Restaurant.findOneAndUpdate = sinon.stub().callsFake(() => populate);
+
             Controller.getMenus(req, res);
+
             sinon.assert.calledWith(
                 Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {}, {upsert: true, new: true}
+                {RID: req.params.id}, {}, {
+                    upsert: true,
+                    new: true
+                },
             );
+
+            sinon.assert.calledWith(
+                populate.populate,
+                {
+                    path: 'menus',
+                    populate: { // 2nd level subdoc (get users in comments)
+                        path: 'categories',
+                    }
+                }
+            );
+        };
+        it('should return expected restaurants', test(function () {
+            const mongoResponse = ['test', 'test2'];
+            addSpyAndAssert(undefined, mongoResponse);
             sinon.assert.calledWith(res.send, mongoResponse);
         }));
 
-        it('should return correct status for not found menus', test(function () {
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                populate: () => ({
-                    exec: exec => exec(undefined, undefined)
-                })
-            });
-            Controller.getMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.status, 404);
-
+        it('should return 500 when restaurants error', test(function () {
+            addSpyAndAssert('error', undefined);
+            sinon.assert.calledWith(res.send, 500, 'error');
         }));
 
-        it('should return correct status for error', test(function () {
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                populate: () => ({
-                    exec: exec => exec('test error', undefined)
-                })
-            });
-            Controller.getMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.send, 500, 'test error');
+        it('should return 404 when restaurants undefined', test(function () {
+            addSpyAndAssert(undefined, undefined);
+            sinon.assert.calledWith(res.send, 404);
         }));
-
     });
 
     describe('update', function () {
@@ -186,196 +194,36 @@ describe('Restaurant Controller', function () {
             expectedResult = req.body
         });
 
-        it('should return expected restaurant', test(function () {
-            const mongoResponse = {testrestaurant: 'test'};
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec(undefined, mongoResponse)
+        const addSpyAndAssert = (error, response) => {
+            Restaurant.findOneAndUpdate = sinon.stub().callsFake(() => ({exec: exec => exec(error, response)}));
 
-            });
             Controller.update(req, res);
+
             sinon.assert.calledWith(
                 Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
+                {RID: req.params.id},
+                req.body,
+                {upsert: true, new: true},
             );
+        };
+        it('should return expected restaurants', test(function () {
+            const mongoResponse = ['test', 'test2'];
+            addSpyAndAssert(undefined, mongoResponse);
             sinon.assert.calledWith(res.send, mongoResponse);
         }));
 
-        it('should return correct status for not found restaurant', test(function () {
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec(undefined, undefined)
-            });
-            Controller.update(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.status, 404);
-
+        it('should return 500 when restaurants error', test(function () {
+            addSpyAndAssert('error', undefined);
+            sinon.assert.calledWith(res.send, 500, 'error');
         }));
 
-        it('should return correct status for error', test(function () {
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec('test error', undefined)
-            });
-            Controller.update(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.send, 500, 'test error');
+        it('should return 404 when restaurants undefined', test(function () {
+            addSpyAndAssert(undefined, undefined);
+            sinon.assert.calledWith(res.send, 404);
         }));
-
     });
 
-    describe('updateMenus', function () {
-        beforeEach(function () {
-            res = {
-                send: sinon.stub().returns({end: sinon.spy()}),
-                status: sinon.stub().returns({end: sinon.spy()})
-            };
-        });
-
-        it('should return expected restaurant', test(function () {
-            var expectedRestaurant = 'test';
-            const restaurant = {
-                populate: () => ({
-                    populate: func => func(undefined, expectedRestaurant)
-                }),
-                menus: ['testMenu'],
-            };
-            const mongoResponse = {
-                save: (func) => func(undefined, restaurant),
-                ...restaurant
-            };
-            req.body.menus = [{test: '123'}];
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec(undefined, mongoResponse)
-
-            });
-            this.stub(Menu.prototype, 'save').yields(undefined);
-
-            Controller.updateMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.send, expectedRestaurant);
-        }));
-
-        it('should return 500 when error at findOneAndUpdate', test(function () {
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec('error', undefined)
-            });
-
-            Controller.updateMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.send, 500, 'error');
-        }));
-
-        it('should return 500 when error at save of menus', test(function () {
-            var expectedRestaurant = 'test';
-            const restaurant = {
-                populate: () => ({
-                    populate: func => func(undefined, expectedRestaurant)
-                }),
-                menus: ['testMenu'],
-            };
-            const mongoResponse = {
-                save: (func) => func(undefined, restaurant),
-                ...restaurant
-            };
-            req.body.menus = [{test: '123'}];
-
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec(undefined, mongoResponse)
-            });
-            this.stub(Menu.prototype, 'save').yields('error');
-
-            Controller.updateMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.send, 500, 'error');
-        }));
-
-        it('should return 404 no restaurant found', test(function () {
-            req.body.menus = [{test: '123'}];
-
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec(undefined, undefined)
-            });
-
-            this.stub(Menu.prototype, 'save').yields(undefined);
-
-            Controller.updateMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.send, 404, 'restaurant not found');
-        }));
-
-        it('should return 500 on save restaurant error', test(function () {
-            var expectedRestaurant = 'test';
-            const restaurant = {
-                populate: () => ({
-                    populate: func => func(undefined, expectedRestaurant)
-                }),
-                menus: ['testMenu'],
-            };
-            const mongoResponse = {
-                save: (func) => func('error', undefined),
-                ...restaurant
-            };
-            req.body.menus = [{test: '123'}];
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec(undefined, mongoResponse)
-
-            });
-            this.stub(Menu.prototype, 'save').yields(undefined);
-
-            Controller.updateMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.send, 500, 'error');
-        }));
-
-        it('should return 500 on populate restaurant error', test(function () {
-            var expectedRestaurant = 'test';
-            const restaurant = {
-                populate: () => ({
-                    populate: func => func('populateError', expectedRestaurant)
-                }),
-                menus: ['testMenu'],
-            };
-            const mongoResponse = {
-                save: (func) => func(undefined, restaurant),
-                ...restaurant
-            };
-            req.body.menus = [{test: '123'}];
-            this.stub(Restaurant, 'findOneAndUpdate').returns({
-                exec: exec => exec(undefined, mongoResponse)
-
-            });
-            this.stub(Menu.prototype, 'save').yields(undefined);
-
-            Controller.updateMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.findOneAndUpdate,
-                {RID: req.params.id}, {upsert: true, new: true}
-            );
-            sinon.assert.calledWith(res.send, 500, 'populateError');
-        }));
-
-    });
-
-    describe('deleteMenus', function () {
+    describe('updateImage', function () {
         beforeEach(function () {
             res = {
                 send: sinon.spy(),
@@ -384,45 +232,81 @@ describe('Restaurant Controller', function () {
             expectedResult = req.body
         });
 
-        it('should return expected return value for successfull delete', test(function () {
-            const mongoResponse = 'test123';
-            req.body.menus = [{_id: 1}];
-            this.stub(Restaurant, 'update').returns({
-                exec: exec => exec(undefined, mongoResponse)
-            });
-            Controller.deleteMenus(req, res);
+        const addSpyAndAssert = (error, response) => {
+            req.file = {
+                url: 'testurl',
+                public_id: 'publicId',
+            };
+            Restaurant.findOneAndUpdate = sinon.stub().callsFake(() => ({exec: exec => exec(error, response)}));
+
+            Controller.updateImage(req, res);
+
             sinon.assert.calledWith(
-                Restaurant.update,
+                Restaurant.findOneAndUpdate,
                 {RID: req.params.id},
+                { imageUrl: req.file.url },
+                {upsert: true, new: true},
             );
+        };
+        it('should return expected restaurant', test(function () {
+            const mongoResponse = 'test';
+            addSpyAndAssert(undefined, mongoResponse);
             sinon.assert.calledWith(res.send, mongoResponse);
         }));
 
-        it('should return 500 when error at delete', test(function () {
-            req.body.menus = [{_id: 1}];
-            this.stub(Restaurant, 'update').returns({
-                exec: exec => exec('error', undefined)
-            });
-            Controller.deleteMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.update,
-                {RID: req.params.id},
-            );
+        it('should return 500 when restaurant error', test(function () {
+            addSpyAndAssert('error', undefined);
             sinon.assert.calledWith(res.send, 500, 'error');
         }));
 
-        it('should return 404 when delete returns undefined', test(function () {
-            req.body.menus = [{_id: 1}];
-            this.stub(Restaurant, 'update').returns({
-                exec: exec => exec(undefined, undefined)
-            });
-            Controller.deleteMenus(req, res);
-            sinon.assert.calledWith(
-                Restaurant.update,
-                {RID: req.params.id},
-            );
-            sinon.assert.calledWith(res.status, 404);
+        it('should return 404 when restaurant undefined', test(function () {
+            addSpyAndAssert(undefined, undefined);
+            sinon.assert.calledWith(res.send, 404);
         }));
     });
+
+    describe('updateMenus', function () {
+        beforeEach(function () {
+            res = {
+                send: sinon.spy(),
+                status: sinon.stub().returns({end: sinon.spy()})
+            };
+            expectedResult = req.body
+        });
+
+        const addSpyAndAssert = (error, response) => {
+            req.file = {
+                url: 'testurl',
+                public_id: 'publicId',
+            };
+            Restaurant.findOneAndUpdate = sinon.stub().callsFake(() => ({exec: exec => exec(error, response)}));
+
+            Controller.updateMenus(req, res);
+
+            sinon.assert.calledWith(
+                Restaurant.findOneAndUpdate,
+                {RID: req.params.id},
+                {upsert: true, new: true},
+            );
+        };
+
+        it('should call restaurantUtil when necessary', test(function () {
+            sandbox.stub(restaurantUtil, 'createOrUpdateMenus');
+            req.body.menus = 'test1';
+            addSpyAndAssert(undefined, 'test');
+            sinon.assert.calledWith(restaurantUtil.createOrUpdateMenus, 'test1', 'test');
+        }));
+
+        it('should return 500 when restaurant error', test(function () {
+            addSpyAndAssert('error', undefined);
+            sinon.assert.calledWith(res.send, 500, 'error');
+        }));
+
+        it('should return 404 when restaurant undefined', test(function () {
+            addSpyAndAssert(undefined, undefined);
+            sinon.assert.calledWith(res.send, 404);
+        }));
+    });
+
 
 });
