@@ -14,7 +14,7 @@ const menuSchema = new Schema({
     categories: [{type: Schema.Types.ObjectId, ref: 'Category'}]
 });
 
-menuSchema.post('remove', menu => menuUtil.removeLinkedCategoriesWhenUnused(menu, mongoose.model('Menu', menuSchema, 'menus')));
+menuSchema.post('remove', (menu, next) => menuUtil.removeLinkedCategoriesWhenUnused(menu, mongoose.model('Menu', menuSchema, 'menus'), next));
 
 const model = mongoose.model('Menu', menuSchema, 'menus');
 

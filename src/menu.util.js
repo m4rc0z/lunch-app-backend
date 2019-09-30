@@ -1,11 +1,10 @@
 const async = require('async');
 const Category = require('./models/category.model');
-const Menu = require('./models/menu.model');
 
 const menuUtil = {};
 
-menuUtil.removeLinkedCategoriesWhenUnused = (menu, model) => {
-    console.log(Menu);
+menuUtil.removeLinkedCategoriesWhenUnused = (menu, model, next) => {
+    try {
         async.each(menu.categories, (c, callback) => {
                 model.find({categories: { $in: [c] }}).count().exec((err, count) => {
                     if (count === 0) {
@@ -19,11 +18,13 @@ menuUtil.removeLinkedCategoriesWhenUnused = (menu, model) => {
             },
             (err) => {
                 if (err) {
-                    console.log(err);
-                    throw new Error('menu post save error');
+                    next(new Error('menu post save error' + err));
                 }
             }
         );
+    } catch(e) {
+        next(new Error('menu post save error ' + e));
+    }
 };
 
 module.exports = menuUtil;

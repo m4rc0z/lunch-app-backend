@@ -11,32 +11,32 @@ restaurantUtil.saveMenu = (menu, callback) => {
     });
 };
 
-restaurantUtil.saveRestaurant = (restaurant, callback) => {
+restaurantUtil.saveRestaurant = (restaurant, res) => {
     restaurant.save((err, restaurant) => {
         if (err) {
-            return callback(500, err);
+            return res.send(500, err);
         }
 
         restaurant.populate('menus').populate('categories').populate((err, populatedRestaurant) => {
             if (err) {
-                callback(500, err);
+                res.send(500, err);
             } else {
-                callback(populatedRestaurant);
+                res.send(populatedRestaurant);
             }
         })
     });
 };
-restaurantUtil.saveRestaurantAndMenus = (menusToSave, restaurant, send) => {
+restaurantUtil.saveRestaurantAndMenus = (menusToSave, restaurant, res) => {
     async.map(
         menusToSave,
         (menu, callback) => restaurantUtil.saveMenu(menu, callback),
         function (err, menus) {
             // code to run on completion or err
             if (err) {
-                send(500, err);
+                res.send(500, err);
             } else {
                 menus.forEach(m => restaurant.menus.push(m._id));
-                restaurantUtil.saveRestaurant(restaurant, send)
+                restaurantUtil.saveRestaurant(restaurant, res)
             }
         }
     );
@@ -83,7 +83,7 @@ restaurantUtil.createOrUpdateCategories = (menuCategories, menu, callback) => {
     }
 };
 
-restaurantUtil.createOrUpdateMenus = (menus, restaurant, send) => {
+restaurantUtil.createOrUpdateMenus = (menus, restaurant, res) => {
     async.mapLimit(menus, menus.length, (m, callback) => {
             if (m.categories.filter(c => Boolean(c)).length > 0) {
                 restaurantUtil.createOrUpdateCategories(m.categories, m, callback);
@@ -96,9 +96,9 @@ restaurantUtil.createOrUpdateMenus = (menus, restaurant, send) => {
         function (err, menus) {
             // code to run on completion or err
             if (err) {
-                send(500, err)
+                res.send(500, err)
             } else {
-                restaurantUtil.saveRestaurantAndMenus(menus, restaurant, send);
+                restaurantUtil.saveRestaurantAndMenus(menus, restaurant, res);
             }
         }
     );
