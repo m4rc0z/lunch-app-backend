@@ -73,7 +73,7 @@ describe('Restaurant Controller', function () {
 
         it('should return 404 when restaurants undefined', test(function () {
             addSpyAndAssert(undefined, undefined);
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
     });
 
@@ -127,7 +127,7 @@ describe('Restaurant Controller', function () {
 
         it('should return 404 when restaurants undefined', test(function () {
             addSpyAndAssert(undefined, undefined);
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
     });
 
@@ -181,7 +181,7 @@ describe('Restaurant Controller', function () {
 
         it('should return 404 when restaurants undefined', test(function () {
             addSpyAndAssert(undefined, undefined);
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
     });
 
@@ -219,7 +219,7 @@ describe('Restaurant Controller', function () {
 
         it('should return 404 when restaurants undefined', test(function () {
             addSpyAndAssert(undefined, undefined);
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
     });
 
@@ -261,7 +261,7 @@ describe('Restaurant Controller', function () {
 
         it('should return 404 when restaurant undefined', test(function () {
             addSpyAndAssert(undefined, undefined);
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
     });
 

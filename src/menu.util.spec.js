@@ -91,8 +91,9 @@ describe('Menu Util', function () {
                     count: sandbox.stub()
                         .returns(({exec: exec => exec(undefined, 0)}))
                 });
+                const next = sandbox.stub();
 
-                expect(menuUtil.removeLinkedCategoriesWhenUnused.bind(menuUtil, menu, menuModel)).to.throw('menu post save error');
+                menuUtil.removeLinkedCategoriesWhenUnused(menu, menuModel, next);
 
                 sinon.assert.calledWith(
                     menuModel.find,
@@ -100,6 +101,9 @@ describe('Menu Util', function () {
                 );
                 sinon.assert.called(
                     Category.remove,
+                );
+                sinon.assert.called(
+                    next,
                 );
             })
         );
@@ -116,8 +120,9 @@ describe('Menu Util', function () {
                 count: sandbox.stub()
                     .returns(({exec: exec => exec('error', 1)}))
             });
+            const next = sandbox.stub();
 
-            expect(menuUtil.removeLinkedCategoriesWhenUnused.bind(menuUtil, menu, menuModel)).to.throw('menu post save error');
+            menuUtil.removeLinkedCategoriesWhenUnused(menu, menuModel, next);
 
             sinon.assert.calledWith(
                 menuModel.find,
@@ -126,9 +131,9 @@ describe('Menu Util', function () {
             sinon.assert.notCalled(
                 Category.remove,
             );
+            sinon.assert.called(
+                next,
+            );
         }));
-    })
-    ;
-
-})
-;
+    });
+});

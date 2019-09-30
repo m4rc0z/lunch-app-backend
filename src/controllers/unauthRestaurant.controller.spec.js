@@ -42,7 +42,7 @@ describe('Unauth Restaurant Controller', function () {
 
             Controller.getByDate(req, res);
 
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
 
         it('should return expected restaurants', test(function () {
@@ -101,7 +101,7 @@ describe('Unauth Restaurant Controller', function () {
                     categories: { $all: expectedCategories }
                 }
             );
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
 
         it('should return 500 when error at restaurants find', test(function () {
@@ -154,7 +154,7 @@ describe('Unauth Restaurant Controller', function () {
 
             Controller.getRestaurantMenusByDate(req, res);
 
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
 
         it('should return expected restaurants', test(function () {
@@ -220,7 +220,7 @@ describe('Unauth Restaurant Controller', function () {
                     }
                 }
             );
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
 
         it('should return 500 when error at restaurant find', test(function () {

@@ -16,7 +16,7 @@ describe('Restaurant Util', function () {
 
     describe('saveRestaurant', function () {
         it('should call callback with 500 when errors', test(function () {
-            const callback = sandbox.stub();
+            const callback = { send: sandbox.stub() };
             const restaurant = {
                 save: sandbox.stub().callsFake((cb) => {
                     cb('error', undefined);
@@ -29,14 +29,14 @@ describe('Restaurant Util', function () {
                 restaurant.save,
             );
             sinon.assert.calledWith(
-                callback,
+                callback.send,
                 500,
                 'error'
             );
         }));
 
         it('should call populate when no errors', test(function () {
-            const callback = sandbox.stub();
+            const callback = { send: sandbox.stub() };
             const populatedRestaurant = 'newRestaurant';
             const restaurantResult = {
                 populate: sandbox.stub().returns({
@@ -59,13 +59,13 @@ describe('Restaurant Util', function () {
                 restaurant.save,
             );
             sinon.assert.calledWith(
-                callback,
+                callback.send,
                 populatedRestaurant,
             );
         }));
 
         it('should call callback with 500 when errors at population', test(function () {
-            const callback = sandbox.stub();
+            const callback = { send: sandbox.stub() };
             const restaurantResult = {
                 populate: sandbox.stub().returns({
                     populate: sandbox.stub().returns({
@@ -87,7 +87,7 @@ describe('Restaurant Util', function () {
                 restaurant.save,
             );
             sinon.assert.calledWith(
-                callback,
+                callback.send,
                 500,
                 'error'
             );
@@ -148,7 +148,8 @@ describe('Restaurant Util', function () {
                 {courses: [], categories: ['vegan']},
                 {courses: [], categories: []}
             ];
-            const send = sandbox.stub();
+            const callback = { send: sandbox.stub() };
+
 
             sandbox.stub(restaurantUtil, 'saveRestaurantAndMenus');
 
@@ -156,13 +157,13 @@ describe('Restaurant Util', function () {
                 cb('error', undefined);
             });
 
-            restaurantUtil.createOrUpdateMenus(menus, undefined, send);
+            restaurantUtil.createOrUpdateMenus(menus, undefined, callback);
 
             sinon.assert.called(
                 restaurantUtil.createOrUpdateCategories,
             );
             sinon.assert.calledWith(
-                send,
+                callback.send,
                 500,
                 'error'
             );
@@ -250,7 +251,7 @@ describe('Restaurant Util', function () {
     describe('saveRestaurantAndMenus', function () {
         it('should call saveMenu when menus are available', test(function () {
             const menus = ['a', 'b'];
-            const callback = sandbox.stub();
+            const callback = { send: sandbox.stub() };
             const restaurant = 'test';
             sandbox.stub(restaurantUtil, 'saveMenu');
 
@@ -297,14 +298,14 @@ describe('Restaurant Util', function () {
 
         it('should call callback with 500 when errors', test(function () {
             const menus = ['a', 'b'];
-            const send = sandbox.stub();
+            const callback = { send: sandbox.stub() };
             const restaurant = {menus: []};
 
             sandbox.stub(restaurantUtil, 'saveMenu').callsFake((m, cb) => {
                 cb('error', undefined);
             });
 
-            restaurantUtil.saveRestaurantAndMenus(menus, restaurant, send);
+            restaurantUtil.saveRestaurantAndMenus(menus, restaurant, callback);
 
             sinon.assert.calledWith(
                 restaurantUtil.saveMenu,
@@ -315,7 +316,7 @@ describe('Restaurant Util', function () {
                 menus[1],
             );
             sinon.assert.calledWith(
-                send,
+                callback.send,
                 500,
                 'error'
             );

@@ -18,7 +18,7 @@ menuUtil.removeLinkedCategoriesWhenUnused = (menu, model, next) => {
             },
             (err) => {
                 if (err) {
-                    next(new Error('menu post save error' + err));
+                    next(new Error('menu post save error ' + err));
                 }
             }
         );

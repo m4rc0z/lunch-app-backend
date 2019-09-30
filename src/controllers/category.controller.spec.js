@@ -26,7 +26,7 @@ describe('Category Controller', function () {
 
             Controller.getCategories(req, res);
 
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
 
         it('should return expected categories', test(function () {
@@ -138,7 +138,7 @@ describe('Category Controller', function () {
                 {}
             );
 
-            sinon.assert.calledWith(res.status, 404);
+            sinon.assert.calledWith(res.send, 404);
         }));
 
         it('should return 500 when error at categories find', test(function () {

@@ -6,7 +6,7 @@ const Controller = {};
 
 Controller.getCategories = function (req, res) {
     try {
-        if (!req.query.fromDate || !req.query.toDate) {
+        if (!req.query || !req.query.fromDate || !req.query.toDate) {
             return res.send(404, 'not found');
         }
         const start = new Date(req.query.fromDate.substr(0, 10));
