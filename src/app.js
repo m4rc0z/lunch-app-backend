@@ -33,8 +33,8 @@ db.createCollection('category');
 
 app.use('/', indexRouter);
 app.use('/authenticated/api/restaurants', authenticatedRestaurants);
-app.use('/unauthenticated/api2/restaurants', unauthenticatedRestaurants);
-app.use('/unauthenticated/api2/categories', unauthenticatedCategories);
+app.use('/unauthenticated/api/restaurants', unauthenticatedRestaurants);
+app.use('/unauthenticated/api/categories', unauthenticatedCategories);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
