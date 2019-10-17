@@ -25,8 +25,8 @@ Controller.getCategories = function (req, res) {
                         (c, callback) => {
                             Menu.find({
                                 date: {
-                                    $gt: start,
-                                    $lt: end
+                                    $gte: start,
+                                    $lte: end
                                 },
                                 categories: {$in: c._id}
                             }).count().exec((err, count) => {

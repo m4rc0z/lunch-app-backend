@@ -14,10 +14,10 @@ Controller.getByDate = function (req, res) {
         return Restaurant.find({})
             .populate('menus', null, {
                     date: {
-                        $gt: start,
-                        $lt: end
+                        $gte: start,
+                        $lte: end
                     },
-                    ...(categories ? {categories: {$all: categories}} : undefined)
+                    ...(categories ? {categories: {$in: categories}} : undefined)
                 }
             )
             .exec(function (err, restaurants) {
@@ -48,10 +48,10 @@ Controller.getRestaurantMenusByDate = function (req, res) {
                     path: 'menus',
                     match: {
                         date: {
-                            $gt: start,
-                            $lt: end
+                            $gte: start,
+                            $lte: end
                         },
-                        ...(categories ? {categories: {$all: categories}} : undefined)
+                        ...(categories ? {categories: {$in: categories}} : undefined)
                     },
                     populate: {
                         path: 'categories',
