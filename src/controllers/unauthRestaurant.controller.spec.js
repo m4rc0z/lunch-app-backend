@@ -69,10 +69,10 @@ describe('Unauth Restaurant Controller', function () {
                 populate.populate,
                 'menus', null, {
                     date: {
-                        $gt: start,
-                        $lt: end
+                        $gte: start,
+                        $lte: end
                     },
-                    categories: { $all: expectedCategories }
+                    categories: { $in: expectedCategories }
                 }
             );
             sinon.assert.calledWith(res.send, filteredResponse);
@@ -95,10 +95,10 @@ describe('Unauth Restaurant Controller', function () {
                 populate.populate,
                 'menus', null, {
                     date: {
-                        $gt: start,
-                        $lt: end
+                        $gte: start,
+                        $lte: end
                     },
-                    categories: { $all: expectedCategories }
+                    categories: { $in: expectedCategories }
                 }
             );
             sinon.assert.calledWith(res.send, 404);
@@ -121,10 +121,10 @@ describe('Unauth Restaurant Controller', function () {
                 populate.populate,
                 'menus', null, {
                     date: {
-                        $gt: start,
-                        $lt: end
+                        $gte: start,
+                        $lte: end
                     },
-                    categories: { $all: expectedCategories }
+                    categories: { $in: expectedCategories }
                 }
             );
             sinon.assert.calledWith(res.send, 500, 'error');
@@ -178,10 +178,10 @@ describe('Unauth Restaurant Controller', function () {
                     path: 'menus',
                     match: {
                         date: {
-                            $gt: start,
-                            $lt: end
+                            $gte: start,
+                            $lte: end
                         },
-                        categories: { $all: expectedCategories },
+                        categories: { $in: expectedCategories },
                     },
                     populate: { // 2nd level subdoc (get users in comments)
                         path: 'categories',
@@ -210,10 +210,10 @@ describe('Unauth Restaurant Controller', function () {
                     path: 'menus',
                     match: {
                         date: {
-                            $gt: start,
-                            $lt: end
+                            $gte: start,
+                            $lte: end
                         },
-                        categories: { $all: expectedCategories },
+                        categories: { $in: expectedCategories },
                     },
                     populate: { // 2nd level subdoc (get users in comments)
                         path: 'categories',
@@ -242,10 +242,10 @@ describe('Unauth Restaurant Controller', function () {
                     path: 'menus',
                     match: {
                         date: {
-                            $gt: start,
-                            $lt: end
+                            $gte: start,
+                            $lte: end
                         },
-                        categories: { $all: expectedCategories },
+                        categories: { $in: expectedCategories },
                     },
                     populate: { // 2nd level subdoc (get users in comments)
                         path: 'categories',
