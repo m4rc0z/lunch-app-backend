@@ -56,8 +56,8 @@ describe('Category Controller', function () {
                 Menu.find,
                 {
                     date: {
-                        $gt: start,
-                        $lt: end
+                        $gte: start,
+                        $lte: end
                     },
                     categories: {$in: '1'}
                 }
@@ -67,8 +67,8 @@ describe('Category Controller', function () {
                 Menu.find,
                 {
                     date: {
-                        $gt: start,
-                        $lt: end
+                        $gte: start,
+                        $lte: end
                     },
                     categories: {$in: '2'}
                 }
@@ -103,8 +103,8 @@ describe('Category Controller', function () {
                 Menu.find,
                 {
                     date: {
-                        $gt: start,
-                        $lt: end
+                        $gte: start,
+                        $lte: end
                     },
                     categories: {$in: '1'}
                 }
@@ -114,8 +114,8 @@ describe('Category Controller', function () {
                 Menu.find,
                 {
                     date: {
-                        $gt: start,
-                        $lt: end
+                        $gte: start,
+                        $lte: end
                     },
                     categories: {$in: '2'}
                 }
