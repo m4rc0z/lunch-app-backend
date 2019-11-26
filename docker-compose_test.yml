@@ -1,0 +1,14 @@
+version: '3.2'
+
+services:
+  test:
+    container_name: node-app-test
+    build:
+      context: .
+      dockerfile: Dockerfile_local
+    volumes:
+      - './:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    environment:
+      - CI=true
+    command: npm test
