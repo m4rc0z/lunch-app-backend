@@ -4,7 +4,15 @@
   "private": true,
   "scripts": {
     "start": "node ./src/bin/www",
-    "test": "mocha 'src/**/*.spec.js'"
+    "test": "mocha 'src/**/*.spec.js'",
+    "test:unit": "docker-compose -f docker-compose_test.yml build test && docker-compose -f docker-compose_test.yml run --rm test",
+    "build:latest": "docker build -t m4rc0z/lunch-app-backend:latest -f Dockerfile .",
+    "publish:latest": "docker push m4rc0z/lunch-app-backend:latest",
+    "build:dev": "docker build -t m4rc0z/lunch-app-backend:dev.mealit.de -f Dockerfile .",
+    "publish:dev": "docker push m4rc0z/lunch-app-backend:dev.mealit.de",
+    "build:prod": "docker build --build-arg auth_domain=$AUTH_DOMAIN --build-arg auth_client_id=$AUTH_CLIENT_ID --build-arg auth_audience=$AUTH_AUDIENCE --build-arg auth_container=$AUTH_CONTAINER --build-arg callback_url=$CALLBACK_URL --build-arg backend_url=$BACKEND_URL -t m4rc0z/lunch-app-backend:admin.mealit.de -f Dockerfile .",
+    "publish:prod": "docker push m4rc0z/lunch-app-backend:admin.mealit.de",
+    "docker:login": "echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
