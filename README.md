@@ -1,5 +1,29 @@
 # lunch-app-backend
 
+### Local Setup
+
+#####start backend:
+
+```bash
+$ npm run start:local
+```
+
+This will create a local mongodb with a database name `lunch-app-database` 
+and a user `admin` with the password `admin`. 
+It will also start the backend including the local mongodb instance.
+The backend will be available on `http://localhost:3005`
+
+
+#####start frontend:
+
+1. to start the frontend you must checkout an other repository:
+
+```bash
+$ git checkout https://github.com/m4rc0z/lunch-admin-app.git
+```
+
+2. to start the frontend see instructions for local setup inside the readme of the frontend repository
+
 ## Docker
 
 Build container:
