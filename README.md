@@ -12,6 +12,8 @@ This will create a local mongodb with a database name `lunch-app-database`
 and a user `admin` with the password `admin`. 
 It will also start the backend including the local mongodb instance.
 The backend will be available on `http://localhost:3005`
+It can happen that the backend throws an error at the first connect to the mongodb, 
+in this case the backend tries to reconnect. 
 
 
 #####start frontend:
