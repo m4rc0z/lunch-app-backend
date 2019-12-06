@@ -1,0 +1,41 @@
+version: '3.5'
+
+services:
+  app_backend:
+    container_name: lunchbackend
+    environment:
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+      - DB_HOST=mongo
+      - DB_NAME=lunch-app-database
+    build:
+      context: .
+      dockerfile: Dockerfile_dev
+    restart: always
+    ports:
+      - "3005:3005"
+    volumes:
+      - .:/app
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    networks:
+      - lunch_app
+  mongo:
+    image: mongo
+    environment:
+      - MONGO_INITDB_DATABASE=lunch-app-database
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./mongo-volume:/data/db
+    expose:
+      - 27017
+    ports:
+      - "27017:27017"
+    networks:
+      - lunch_app
+networks:
+  lunch_app:

@@ -20,16 +20,27 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const mongoDB = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
-// const mongoDB = `mongodb://${process.env.DB_HOST}/${process.env.DB_NAME}`;
-mongoose.connect(mongoDB);
+mongoose.connect(mongoDB, {useNewUrlParser: true});
 mongoose.Promise = global.Promise;
 const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+db.on('error', (err) => {
+    if (err.message && err.message.match(/failed to connect to server .* on first connect/)) {
+        console.log(new Date(), String(err));
+
+        // Wait for a bit, then try to connect again
+        setTimeout(function () {
+            console.log("Retrying first connect");
+            mongoose.connect(mongoDB, {useNewUrlParser: true});
+        }, 20000);
+    } else {
+        console.error(new Date(), String(err));
+    }
+});
 
 db.createCollection('restaurants');
 db.createCollection('menus');
 db.createCollection('category');
-// db.collections['menus'].deleteMany(); // TODO(before-release): remove this
 
 app.use('/', indexRouter);
 app.use('/authenticated/api/restaurants', authenticatedRestaurants);
