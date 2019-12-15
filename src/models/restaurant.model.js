@@ -8,6 +8,8 @@ const restaurantSchema = new Schema({
     address: String,
     postalCode: String,
     city: String,
+    latitude: Number,
+    longitude: Number,
     imageUrl: String,
     menus: [{ type: Schema.Types.ObjectId, ref: 'Menu'}]
 });
