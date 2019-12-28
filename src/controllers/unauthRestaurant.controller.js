@@ -23,7 +23,7 @@ Controller.getByDate = function (req, res) {
             )
             .exec(function (err, restaurants) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurants) {
                     return res.send(404, 'not found');
@@ -63,7 +63,7 @@ Controller.getRestaurantMenusByDate = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');

@@ -17,7 +17,7 @@ Controller.getCategories = function (req, res) {
             .find({})
             .exec(function (err, categories) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!categories) {
                     return res.send(404, 'not found');
@@ -37,7 +37,7 @@ Controller.getCategories = function (req, res) {
                         },
                         (err, filteredCategories) => {
                             if (err) {
-                                Sentry.captureException(err);
+                                throw err;
                                 return res.send(500, err);
                             }
 

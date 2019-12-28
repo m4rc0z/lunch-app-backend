@@ -18,7 +18,7 @@ Controller.getAll = function (req, res) {
             )
             .exec(function (err, restaurants) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurants) {
                     return res.send(404, 'not found');
@@ -42,7 +42,7 @@ Controller.getOne = function (req, res) {
             .populate('menus').populate('categories')
             .exec(function (err, restaurant) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -71,7 +71,7 @@ Controller.getMenus = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -95,7 +95,7 @@ Controller.update = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -122,7 +122,7 @@ Controller.updateImage = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -145,7 +145,7 @@ Controller.updateMenus = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else {
                     if (!restaurant) {
@@ -179,7 +179,7 @@ Controller.deleteMenus = function (req, res) {
             },
             (err, menus) => {
                 if (err) {
-                    Sentry.captureException(err);
+                    throw err;
                     return res.send(500, err);
                 } else if (!menus) {
                     return res.send(404, 'not found');
@@ -195,7 +195,7 @@ Controller.deleteMenus = function (req, res) {
                                 });
                             }, (err) => {
                                 if (err) {
-                                    Sentry.captureException(err);
+                                    throw err;
                                     return res.send(500, err);
                                 } else {
                                     return res.send(menus);
