@@ -1,7 +1,14 @@
 const Menu = require('../models/menu.model');
 const Category = require('../models/category.model');
 const async = require('async');
-
+const Sentry = require('@sentry/node');
+Sentry.init({
+    dsn: 'https://81bba44887da42edb0456c9f9b3ebcab@sentry.io/1862646',
+    beforeSend(event) {
+        if (process.env.development) return null;
+        return event;
+    }
+});
 const Controller = {};
 
 Controller.getCategories = function (req, res) {
@@ -16,6 +23,7 @@ Controller.getCategories = function (req, res) {
             .find({})
             .exec(function (err, categories) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!categories) {
                     return res.send(404, 'not found');
@@ -35,6 +43,7 @@ Controller.getCategories = function (req, res) {
                         },
                         (err, filteredCategories) => {
                             if (err) {
+                                throw err;
                                 return res.send(500, err);
                             }
 
@@ -44,6 +53,7 @@ Controller.getCategories = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };

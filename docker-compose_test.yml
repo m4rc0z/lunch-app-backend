@@ -11,4 +11,5 @@ services:
       - '/usr/src/app/node_modules'
     environment:
       - CI=true
+      - development=true
     command: npm test

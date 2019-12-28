@@ -9,8 +9,17 @@ const indexRouter = require('./routes');
 const authenticatedRestaurants = require('./routes/restaurants');
 const unauthenticatedRestaurants = require('./routes/unauthRestaurants');
 const unauthenticatedCategories = require('./routes/categories');
+const Sentry = require('@sentry/node');
 
-// view engine setup
+Sentry.init({
+    dsn: 'https://81bba44887da42edb0456c9f9b3ebcab@sentry.io/1862646',
+    beforeSend(event) {
+        if (process.env.development) return null;
+        return event;
+    }
+});
+app.use(Sentry.Handlers.requestHandler());
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(logger('dev'));
@@ -47,16 +56,19 @@ app.use('/authenticated/api/restaurants', authenticatedRestaurants);
 app.use('/unauthenticated/api/restaurants', unauthenticatedRestaurants);
 app.use('/unauthenticated/api/categories', unauthenticatedCategories);
 
-// catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+    next(createError(404));
 });
+// catch 404 and forward to error handler
+app.use(Sentry.Handlers.errorHandler());
 
 // error handler
 app.use(function(err, req, res) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  Sentry.captureException(err);
 
   // render the error page
   res.status(err.status || 500);

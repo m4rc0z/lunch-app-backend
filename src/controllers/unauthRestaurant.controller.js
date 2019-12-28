@@ -1,5 +1,12 @@
 const Restaurant = require('../models/restaurant.model');
-
+const Sentry = require('@sentry/node');
+Sentry.init({
+    dsn: 'https://81bba44887da42edb0456c9f9b3ebcab@sentry.io/1862646',
+    beforeSend(event) {
+        if (process.env.development) return null;
+        return event;
+    }
+});
 const Controller = {};
 
 Controller.getByDate = function (req, res) {
@@ -22,6 +29,7 @@ Controller.getByDate = function (req, res) {
             )
             .exec(function (err, restaurants) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurants) {
                     return res.send(404, 'not found');
@@ -30,7 +38,8 @@ Controller.getByDate = function (req, res) {
                 }
             });
     } catch (e) {
-        return res.send(500, e);
+        Sentry.captureException(e);
+        res.send(500, e);
     }
 };
 
@@ -60,6 +69,7 @@ Controller.getRestaurantMenusByDate = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -68,6 +78,7 @@ Controller.getRestaurantMenusByDate = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
