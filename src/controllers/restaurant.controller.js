@@ -3,7 +3,14 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const Menu = require('../models/menu.model');
 const restaurantUtil = require("../restaurant.util");
 const Restaurant = require('../models/restaurant.model');
-
+const Sentry = require('@sentry/node');
+Sentry.init({
+    dsn: 'https://81bba44887da42edb0456c9f9b3ebcab@sentry.io/1862646',
+    beforeSend(event) {
+        if (process.env.development) return null;
+        return event;
+    }
+});
 const Controller = {};
 Controller.getAll = function (req, res) {
     try {
@@ -17,6 +24,7 @@ Controller.getAll = function (req, res) {
             )
             .exec(function (err, restaurants) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurants) {
                     return res.send(404, 'not found');
@@ -25,6 +33,7 @@ Controller.getAll = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
@@ -39,6 +48,7 @@ Controller.getOne = function (req, res) {
             .populate('menus').populate('categories')
             .exec(function (err, restaurant) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -47,6 +57,7 @@ Controller.getOne = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
@@ -66,6 +77,7 @@ Controller.getMenus = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -74,6 +86,7 @@ Controller.getMenus = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
@@ -88,6 +101,7 @@ Controller.update = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -96,6 +110,7 @@ Controller.update = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
@@ -113,6 +128,7 @@ Controller.updateImage = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
@@ -121,6 +137,7 @@ Controller.updateImage = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
@@ -134,6 +151,7 @@ Controller.updateMenus = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else {
                     if (!restaurant) {
@@ -148,6 +166,7 @@ Controller.updateMenus = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
@@ -166,6 +185,7 @@ Controller.deleteMenus = function (req, res) {
             },
             (err, menus) => {
                 if (err) {
+                    throw err;
                     return res.send(500, err);
                 } else if (!menus) {
                     return res.send(404, 'not found');
@@ -181,6 +201,7 @@ Controller.deleteMenus = function (req, res) {
                                 });
                             }, (err) => {
                                 if (err) {
+                                    throw err;
                                     return res.send(500, err);
                                 } else {
                                     return res.send(menus);
@@ -191,6 +212,7 @@ Controller.deleteMenus = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
