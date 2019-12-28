@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./src/bin/www",
-    "test": "mocha 'src/**/*.spec.js'",
+    "test": "env development=true mocha 'src/**/*.spec.js'",
     "start:local": "docker-compose -f docker-compose_dev.yml -p lunch_app up -d --build",
     "test:unit": "docker-compose -f docker-compose_test.yml build test && docker-compose -f docker-compose_test.yml run --rm test",
     "build:latest": "docker build -t m4rc0z/lunch-app-backend:latest -f Dockerfile .",
