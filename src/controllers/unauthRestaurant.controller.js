@@ -5,7 +5,6 @@ const Controller = {};
 
 Controller.getByDate = function (req, res) {
     try {
-        abc();
         if (!req.query || (!req.query.fromDate || !req.query.toDate)) {
             return res.send(404, 'not found');
         }
@@ -24,6 +23,7 @@ Controller.getByDate = function (req, res) {
             )
             .exec(function (err, restaurants) {
                 if (err) {
+                    Sentry.captureException(err);
                     return res.send(500, err);
                 } else if (!restaurants) {
                     return res.send(404, 'not found');
@@ -63,6 +63,7 @@ Controller.getRestaurantMenusByDate = function (req, res) {
             )
             .exec(function (err, restaurant) {
                 if (err) {
+                    Sentry.captureException(err);
                     return res.send(500, err);
                 } else if (!restaurant) {
                     return res.send(404, 'not found');
