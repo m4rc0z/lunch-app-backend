@@ -1,9 +1,11 @@
 const Restaurant = require('../models/restaurant.model');
-
+const Sentry = require('@sentry/node');
+Sentry.init({ dsn: 'https://81bba44887da42edb0456c9f9b3ebcab@sentry.io/1862646' });
 const Controller = {};
 
 Controller.getByDate = function (req, res) {
     try {
+        abc();
         if (!req.query || (!req.query.fromDate || !req.query.toDate)) {
             return res.send(404, 'not found');
         }
@@ -30,7 +32,8 @@ Controller.getByDate = function (req, res) {
                 }
             });
     } catch (e) {
-        return res.send(500, e);
+        Sentry.captureException(e);
+        res.send(500, e);
     }
 };
 
@@ -68,6 +71,7 @@ Controller.getRestaurantMenusByDate = function (req, res) {
                 }
             });
     } catch (e) {
+        Sentry.captureException(e);
         return res.send(500, e);
     }
 };
