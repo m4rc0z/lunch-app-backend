@@ -71,12 +71,13 @@ const adminCheck = (req, res, next) => {
     }
 };
 
-router.get('/', checkJwt, onlyForAdmin, Controller.getAll);
-router.get('/:id', checkJwt, adminCheck, Controller.getOne);
-router.get('/:id/menus', checkJwt, adminCheck, Controller.getMenus);
-router.put('/:id/menus', checkJwt, adminCheck, Controller.updateMenus);
-router.delete('/:id/menus', checkJwt, adminCheck, Controller.deleteMenus);
+router.get('/', checkJwt, Controller.getAll);
+router.get('/:id', checkJwt, Controller.getOne);
+router.get('/:id/menus', checkJwt, Controller.getMenus);
+router.put('/:id/menus', checkJwt, Controller.updateMenus);
+router.delete('/:id/menus', checkJwt, Controller.deleteMenus);
 router.post('/:id/image', checkJwt, adminCheck, parser.single("image"), Controller.updateImage);
+router.post('/:id/mapImage', checkJwt, adminCheck, parser.single("image"), Controller.updateMapImage);
 router.put('/:id', checkJwt, adminCheck, Controller.update);
 
 module.exports = router;

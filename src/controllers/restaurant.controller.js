@@ -142,6 +142,33 @@ Controller.updateImage = function (req, res) {
     }
 };
 
+Controller.updateMapImage = function (req, res) {
+    try {
+        const image = {};
+        image.url = req.file.url;
+        image.id = req.file.public_id;
+        return Restaurant
+            .findOneAndUpdate(
+                {RID: req.params.id},
+                {mapImageUrl: image.url},
+                {upsert: true, new: true},
+            )
+            .exec(function (err, restaurant) {
+                if (err) {
+                    throw err;
+                    return res.send(500, err);
+                } else if (!restaurant) {
+                    return res.send(404, 'not found');
+                } else {
+                    return res.send(restaurant);
+                }
+            });
+    } catch (e) {
+        Sentry.captureException(e);
+        return res.send(500, e);
+    }
+};
+
 Controller.updateMenus = function (req, res) {
     try {
         Restaurant
