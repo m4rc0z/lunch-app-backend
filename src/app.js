@@ -35,7 +35,6 @@ const db = mongoose.connection;
 
 db.on('error', (err) => {
     if (err.message && err.message.match(/failed to connect to server .* on first connect/)) {
-        console.log(new Date(), String(err));
 
         // Wait for a bit, then try to connect again
         setTimeout(function () {
@@ -50,6 +49,7 @@ db.on('error', (err) => {
 db.createCollection('restaurants');
 db.createCollection('menus');
 db.createCollection('category');
+db.createCollection('restaurantCategory');
 
 app.use('/', indexRouter);
 app.use('/authenticated/api/restaurants', authenticatedRestaurants);

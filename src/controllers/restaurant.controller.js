@@ -3,6 +3,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const Menu = require('../models/menu.model');
 const restaurantUtil = require("../restaurant.util");
 const Restaurant = require('../models/restaurant.model');
+const RestaurantCategory = require('../models/restaurantCategory.model');
 const Sentry = require('@sentry/node');
 Sentry.init({
     dsn: 'https://81bba44887da42edb0456c9f9b3ebcab@sentry.io/1862646',
@@ -15,13 +16,18 @@ const Controller = {};
 Controller.getAll = function (req, res) {
     try {
         return Restaurant.find({})
-            .populate({
+            .populate([
+                {
                     path: 'menus',
-                    populate: { // 2nd level subdoc (get users in comments)
+                    populate: {
                         path: 'categories',
                     }
-                }, // 1st level subdoc (get comments)
-            )
+                },
+                {
+                    path: 'categories',
+                    model: 'RestaurantCategory'
+                },
+            ])
             .exec(function (err, restaurants) {
                 if (err) {
                     throw err;
@@ -45,7 +51,18 @@ Controller.getOne = function (req, res) {
                 upsert: true,
                 new: true
             })
-            .populate('menus').populate('categories')
+            .populate([
+                {
+                    path: 'menus',
+                    populate: {
+                        path: 'categories',
+                    }
+                },
+                {
+                    path: 'categories',
+                    model: 'RestaurantCategory'
+                },
+            ])
             .exec(function (err, restaurant) {
                 if (err) {
                     throw err;
@@ -68,13 +85,19 @@ Controller.getMenus = function (req, res) {
             .findOneAndUpdate({RID: req.params.id}, {}, {
                 upsert: true,
                 new: true
-            }).populate({
+            })
+            .populate([
+                {
                     path: 'menus',
-                    populate: { // 2nd level subdoc (get users in comments)
+                    populate: {
                         path: 'categories',
                     }
-                }, // 1st level subdoc (get comments)
-            )
+                },
+                {
+                    path: 'categories',
+                    model: 'RestaurantCategory'
+                },
+            ])
             .exec(function (err, restaurant) {
                 if (err) {
                     throw err;
@@ -93,10 +116,12 @@ Controller.getMenus = function (req, res) {
 
 Controller.update = function (req, res) {
     try {
+        const restaurant = req.body;
+        restaurant.categories = restaurant.categories.map(c => new ObjectId(c));
         return Restaurant
             .findOneAndUpdate(
                 {RID: req.params.id},
-                req.body,
+                restaurant,
                 {upsert: true, new: true},
             )
             .exec(function (err, restaurant) {
@@ -107,6 +132,86 @@ Controller.update = function (req, res) {
                     return res.send(404, 'not found');
                 } else {
                     return res.send(restaurant);
+                }
+            });
+    } catch (e) {
+        Sentry.captureException(e);
+        return res.send(500, e);
+    }
+};
+
+Controller.updateCategories = function (req, res) {
+    try {
+        return RestaurantCategory
+            .find({})
+            .exec(function (err, categories) {
+                if (err) {
+                    throw err;
+                    return res.send(500, err);
+                } else if (!categories) {
+                    return res.send(404, 'not found');
+                } else {
+                    categories.forEach(category => {
+                       const foundCategory = req.body.find(c => c === category.description);
+                       if (!foundCategory) {
+                           // delete category aus BE
+                           category.remove((err, _) => {
+                               if (err) {
+                                   return res.send(500, err);
+                               }
+                           });
+                       }
+                    });
+                    async.each(
+                        req.body
+                        .filter(sentCategory => !categories.some(c => c.description === sentCategory)),
+                        (category, callback) => {
+                            RestaurantCategory.findOneAndUpdate(
+                                {description: category},
+                                {description: category},
+                                {upsert: true, new: true},
+                                (err, _) => {
+                                    callback(err || undefined);
+                                }
+                            );
+                        }, (err) => {
+                            if (err) {
+                                throw err;
+                                return res.send(500, err);
+                            } else {
+                                RestaurantCategory
+                                    .find({}).exec((err, categories) => {
+                                    if (err) {
+                                        throw err;
+                                        return res.send(500, err);
+                                    } else if (!categories) {
+                                        return res.send(404, 'not found');
+                                    } else {
+                                        return res.send(categories);
+                                    }
+                                });
+                            }
+                        });
+                }
+            });
+    } catch (e) {
+        Sentry.captureException(e);
+        return res.send(500, e);
+    }
+};
+
+Controller.getCategories = function (req, res) {
+    try {
+        return RestaurantCategory
+            .find({})
+            .exec(function (err, categories) {
+                if (err) {
+                    throw err;
+                    return res.send(500, err);
+                } else if (!categories) {
+                    return res.send(404, 'not found');
+                } else {
+                    return res.send(categories);
                 }
             });
     } catch (e) {

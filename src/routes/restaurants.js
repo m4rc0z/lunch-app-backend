@@ -72,6 +72,8 @@ const adminCheck = (req, res, next) => {
 };
 
 router.get('/', checkJwt, Controller.getAll);
+router.put('/categories', checkJwt, adminCheck, Controller.updateCategories);
+router.get('/categories', checkJwt, adminCheck, Controller.getCategories);
 router.get('/:id', checkJwt, Controller.getOne);
 router.get('/:id/menus', checkJwt, Controller.getMenus);
 router.put('/:id/menus', checkJwt, Controller.updateMenus);

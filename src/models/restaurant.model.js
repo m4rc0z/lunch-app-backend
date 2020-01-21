@@ -14,6 +14,7 @@ const restaurantSchema = new Schema({
     mapImageUrl: String,
     openingTimesLine1: String,
     openingTimesLine2: String,
+    categories: [{ type: Schema.Types.ObjectId, ref: 'RestaurantCategory'}],
     menus: [{ type: Schema.Types.ObjectId, ref: 'Menu'}]
 });
 

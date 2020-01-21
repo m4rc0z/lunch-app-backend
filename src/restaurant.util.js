@@ -1,7 +1,17 @@
 const async = require('async');
 const Category = require('./models/category.model');
+const Restaurant = require('./models/restaurant.model');
 const Menu = require('./models/menu.model');
 const ObjectId = require('mongoose').Types.ObjectId;
+
+const Sentry = require('@sentry/node');
+Sentry.init({
+    dsn: 'https://81bba44887da42edb0456c9f9b3ebcab@sentry.io/1862646',
+    beforeSend(event) {
+        if (process.env.development) return null;
+        return event;
+    }
+});
 
 const restaurantUtil = {};
 
@@ -42,6 +52,16 @@ restaurantUtil.saveRestaurantAndMenus = (menusToSave, restaurant, res) => {
     );
 };
 
+restaurantUtil.removeUsedRestaurantCategory = function (restaurantCategory, callback) {
+    Restaurant.update({$pull: {categories: { $in: [new ObjectId(restaurantCategory._id)] }}}, {multi: true}, (err, restaurants) => {
+        if (err) {
+            Sentry.captureException(e);
+        }
+
+        callback(err, restaurants);
+    });
+};
+
 restaurantUtil.createOrUpdateCategory = (category, callback) => {
     Category.findOneAndUpdate(
         {description: category.toLowerCase().trim()},
@@ -51,6 +71,7 @@ restaurantUtil.createOrUpdateCategory = (category, callback) => {
         callback(err, category);
     });
 };
+
 restaurantUtil.createOrUpdateCategories = (menuCategories, menu, callback) => {
     const filteredCategories = menuCategories.filter(c => Boolean(c));
     if (filteredCategories.length > 0) {
@@ -69,9 +90,11 @@ restaurantUtil.createOrUpdateCategories = (menuCategories, menu, callback) => {
 
                 callback(err, new Menu({
                     _id: new ObjectId(), ...menu,
-                    ...{categories: menuCats.map(category => {
+                    ...{
+                        categories: menuCats.map(category => {
                             return category._id;
-                        })}
+                        })
+                    }
                 }));
             }
         });
