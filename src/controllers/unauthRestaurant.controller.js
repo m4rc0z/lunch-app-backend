@@ -27,6 +27,12 @@ Controller.getByDate = function (req, res) {
                     ...(categories ? {categories: {$in: categories}} : undefined)
                 }
             )
+            .populate([
+                {
+                    path: 'categories',
+                    model: 'RestaurantCategory'
+                },
+            ])
             .exec(function (err, restaurants) {
                 if (err) {
                     throw err;
@@ -53,19 +59,26 @@ Controller.getRestaurantMenusByDate = function (req, res) {
         const categories = req.query.categories && req.query.categories.split(',');
         return Restaurant
             .findOne({RID: req.params.id}, {}, {})
-            .populate({
-                    path: 'menus',
-                    match: {
-                        date: {
-                            $gte: start,
-                            $lte: end
+            .populate(
+                [
+                    {
+                        path: 'menus',
+                        match: {
+                            date: {
+                                $gte: start,
+                                $lte: end
+                            },
+                            ...(categories ? {categories: {$in: categories}} : undefined)
                         },
-                        ...(categories ? {categories: {$in: categories}} : undefined)
+                        populate: {
+                            path: 'categories',
+                        }
                     },
-                    populate: {
+                    {
                         path: 'categories',
-                    }
-                },
+                        model: 'RestaurantCategory'
+                    },
+                ]
             )
             .exec(function (err, restaurant) {
                 if (err) {
