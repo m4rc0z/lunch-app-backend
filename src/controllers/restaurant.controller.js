@@ -117,7 +117,9 @@ Controller.getMenus = function (req, res) {
 Controller.update = function (req, res) {
     try {
         const restaurant = req.body;
-        restaurant.categories = restaurant.categories.map(c => new ObjectId(c));
+        if (restaurant.categories && restaurant.categories.length > 0) {
+            restaurant.categories = restaurant.categories.map(c => new ObjectId(c));
+        }
         return Restaurant
             .findOneAndUpdate(
                 {RID: req.params.id},

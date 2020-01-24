@@ -20,7 +20,7 @@ describe('Unauth Restaurant Controller', function () {
         res = {}, expectedResult;
 
     let start, end;
-    describe('getByDate', function () {
+    describe('getByDateAndCategory', function () {
         beforeEach(function () {
             res = {
                 send: sinon.spy(),
@@ -40,7 +40,7 @@ describe('Unauth Restaurant Controller', function () {
             req.query.fromDate = undefined;
             req.query.toDate = undefined;
 
-            Controller.getByDate(req, res);
+            Controller.getByDateAndCategory(req, res);
 
             sinon.assert.calledWith(res.send, 404);
         }));
@@ -49,17 +49,19 @@ describe('Unauth Restaurant Controller', function () {
             const expectedCategories = ['vegan', 'vegetarisch'];
 
             const mongoResponse = [
-                { _id: '1', menus: []},
-                { _id: '2', menus: ['test']},
+                {_id: '1', menus: []},
+                {_id: '2', menus: ['test']},
             ];
             const filteredResponse = [
-                { _id: '2', menus: ['test']},
+                {_id: '2', menus: ['test']},
             ];
             const populate = {
-                populate: sinon.stub().callsFake(() => ({exec: exec => exec(undefined, mongoResponse)})),
+                populate: sinon.stub().callsFake(() =>
+                    ({populate: sinon.stub().callsFake(() => ({exec: exec => exec(undefined, mongoResponse)}))}),
+                ),
             };
             Restaurant.find = sinon.stub().callsFake(() => populate);
-            Controller.getByDate(req, res);
+            Controller.getByDateAndCategory(req, res);
             sinon.assert.calledWith(
                 Restaurant.find,
                 {}
@@ -72,7 +74,7 @@ describe('Unauth Restaurant Controller', function () {
                         $gte: start,
                         $lte: end
                     },
-                    categories: { $in: expectedCategories }
+                    categories: {$in: expectedCategories}
                 }
             );
             sinon.assert.calledWith(res.send, filteredResponse);
@@ -82,10 +84,12 @@ describe('Unauth Restaurant Controller', function () {
             const expectedCategories = ['vegan', 'vegetarisch'];
 
             const populate = {
-                populate: sinon.stub().callsFake(() => ({exec: exec => exec(undefined, undefined)})),
+                populate: sinon.stub().callsFake(() =>
+                    ({populate: sinon.stub().callsFake(() => ({exec: exec => exec(undefined, undefined)}))}),
+                ),
             };
             Restaurant.find = sinon.stub().callsFake(() => populate);
-            Controller.getByDate(req, res);
+            Controller.getByDateAndCategory(req, res);
             sinon.assert.calledWith(
                 Restaurant.find,
                 {}
@@ -98,7 +102,7 @@ describe('Unauth Restaurant Controller', function () {
                         $gte: start,
                         $lte: end
                     },
-                    categories: { $in: expectedCategories }
+                    categories: {$in: expectedCategories}
                 }
             );
             sinon.assert.calledWith(res.send, 404);
@@ -108,10 +112,12 @@ describe('Unauth Restaurant Controller', function () {
             const expectedCategories = ['vegan', 'vegetarisch'];
 
             const populate = {
-                populate: sinon.stub().callsFake(() => ({exec: exec => exec('error', undefined)})),
+                populate: sinon.stub().callsFake(() =>
+                    ({populate: sinon.stub().callsFake(() => ({exec: exec => exec('error', undefined)}))}),
+                ),
             };
             Restaurant.find = sinon.stub().callsFake(() => populate);
-            Controller.getByDate(req, res);
+            Controller.getByDateAndCategory(req, res);
             sinon.assert.calledWith(
                 Restaurant.find,
                 {}
@@ -124,7 +130,7 @@ describe('Unauth Restaurant Controller', function () {
                         $gte: start,
                         $lte: end
                     },
-                    categories: { $in: expectedCategories }
+                    categories: {$in: expectedCategories}
                 }
             );
             sinon.assert.calledWith(res.send, 500, 'error');
@@ -161,7 +167,7 @@ describe('Unauth Restaurant Controller', function () {
             const expectedCategories = ['vegan', 'vegetarisch'];
 
             const menus = ['test'];
-            const mongoResponse = { _id: '2', menus: menus};
+            const mongoResponse = {_id: '2', menus: menus};
             const populate = {
                 populate: sinon.stub().callsFake(() => ({exec: exec => exec(undefined, mongoResponse)})),
             };
@@ -174,19 +180,25 @@ describe('Unauth Restaurant Controller', function () {
 
             sinon.assert.calledWith(
                 populate.populate,
-                {
-                    path: 'menus',
-                    match: {
-                        date: {
-                            $gte: start,
-                            $lte: end
+                [
+                    {
+                        path: 'menus',
+                        match: {
+                            date: {
+                                $gte: start,
+                                $lte: end
+                            },
+                            categories: {$in: expectedCategories}
                         },
-                        categories: { $in: expectedCategories },
+                        populate: {
+                            path: 'categories',
+                        }
                     },
-                    populate: { // 2nd level subdoc (get users in comments)
+                    {
                         path: 'categories',
-                    }
-                }
+                        model: 'RestaurantCategory'
+                    },
+                ]
             );
             sinon.assert.calledWith(res.send, menus);
         }));
@@ -206,19 +218,25 @@ describe('Unauth Restaurant Controller', function () {
 
             sinon.assert.calledWith(
                 populate.populate,
-                {
-                    path: 'menus',
-                    match: {
-                        date: {
-                            $gte: start,
-                            $lte: end
+                [
+                    {
+                        path: 'menus',
+                        match: {
+                            date: {
+                                $gte: start,
+                                $lte: end
+                            },
+                            categories: {$in: expectedCategories},
                         },
-                        categories: { $in: expectedCategories },
+                        populate: { // 2nd level subdoc (get users in comments)
+                            path: 'categories',
+                        }
                     },
-                    populate: { // 2nd level subdoc (get users in comments)
+                    {
                         path: 'categories',
+                        model: 'RestaurantCategory'
                     }
-                }
+                ]
             );
             sinon.assert.calledWith(res.send, 404);
         }));
@@ -238,19 +256,25 @@ describe('Unauth Restaurant Controller', function () {
 
             sinon.assert.calledWith(
                 populate.populate,
-                {
-                    path: 'menus',
-                    match: {
-                        date: {
-                            $gte: start,
-                            $lte: end
+                [
+                    {
+                        path: 'menus',
+                        match: {
+                            date: {
+                                $gte: start,
+                                $lte: end
+                            },
+                            categories: {$in: expectedCategories},
                         },
-                        categories: { $in: expectedCategories },
+                        populate: { // 2nd level subdoc (get users in comments)
+                            path: 'categories',
+                        }
                     },
-                    populate: { // 2nd level subdoc (get users in comments)
+                    {
                         path: 'categories',
+                        model: 'RestaurantCategory'
                     }
-                }
+                ]
             );
             sinon.assert.calledWith(res.send, 500, 'error');
         }));

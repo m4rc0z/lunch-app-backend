@@ -4,7 +4,8 @@ require('dotenv').load();
 
 const Controller = require('../controllers/unauthRestaurant.controller');
 
-router.get('/', Controller.getByDate);
+router.get('/', Controller.getByDateAndCategory);
 router.get('/:id/menus', Controller.getRestaurantMenusByDate);
+router.get('/categories/', Controller.getCategories);
 
 module.exports = router;
