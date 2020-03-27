@@ -29,7 +29,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const mongoDB = `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
-mongoose.connect(mongoDB, {useNewUrlParser: true});
+var options = {
+    useNewUrlParser: true,
+    server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
+    replset: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }
+};
+mongoose.connect(mongoDB, options);
 mongoose.Promise = global.Promise;
 const db = mongoose.connection;
 
