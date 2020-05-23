@@ -52,12 +52,7 @@ describe('Restaurant Controller', function () {
 
             sinon.assert.calledWith(
                 populate.populate,
-                {
-                    path: 'menus',
-                    populate: { // 2nd level subdoc (get users in comments)
-                        path: 'categories',
-                    }
-                });
+                [{path: "menus", populate: {path: "categories"}}, {model: "RestaurantCategory", path: "categories"}]);
         };
 
         it('should return expected restaurants', test(function () {
@@ -87,12 +82,7 @@ describe('Restaurant Controller', function () {
         });
 
         const addSpyAndAssert = (error, response) => {
-            const populate = {
-                populate: sinon.stub().callsFake(() => {
-                    return {populate: populate2}
-                }),
-            };
-            const populate2 = sinon.stub().callsFake(() => ({exec: exec => exec(error, response)}));
+            const populate = {populate: sinon.stub().callsFake(() => ({exec: exec => exec(error, response)}))};
             Restaurant.findOneAndUpdate = sinon.stub().callsFake(() => populate);
 
             Controller.getOne(req, res);
@@ -107,11 +97,18 @@ describe('Restaurant Controller', function () {
 
             sinon.assert.calledWith(
                 populate.populate,
-                'menus'
-            );
-            sinon.assert.calledWith(
-                populate2,
-                'categories'
+                [
+                    {
+                        path: 'menus',
+                        populate: {
+                            path: 'categories',
+                        }
+                    },
+                    {
+                        path: 'categories',
+                        model: 'RestaurantCategory'
+                    },
+                ]
             );
         };
         it('should return expected restaurants', test(function () {
@@ -160,12 +157,18 @@ describe('Restaurant Controller', function () {
 
             sinon.assert.calledWith(
                 populate.populate,
-                {
-                    path: 'menus',
-                    populate: { // 2nd level subdoc (get users in comments)
+                [
+                    {
+                        path: 'menus',
+                        populate: {
+                            path: 'categories',
+                        }
+                    },
+                    {
                         path: 'categories',
-                    }
-                }
+                        model: 'RestaurantCategory'
+                    },
+                ]
             );
         };
         it('should return expected restaurants', test(function () {
@@ -244,7 +247,7 @@ describe('Restaurant Controller', function () {
             sinon.assert.calledWith(
                 Restaurant.findOneAndUpdate,
                 {RID: req.params.id},
-                { imageUrl: req.file.url },
+                {imageUrl: req.file.url},
                 {upsert: true, new: true},
             );
         };
